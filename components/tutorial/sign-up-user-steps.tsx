@@ -9,6 +9,7 @@ export default function SignUpUserSteps() {
       process.env.VERCEL_ENV === "production" ? (
         <TutorialStep title="Set up redirect urls">
           <p>It looks like this App is hosted on Vercel.</p>
+
           <p className="mt-4">
             This particular deployment is
             <span className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-xs font-medium text-secondary-foreground border">
@@ -20,6 +21,7 @@ export default function SignUpUserSteps() {
             </span>
             .
           </p>
+
           <p className="mt-4">
             You will need to{" "}
             <Link
@@ -32,6 +34,7 @@ export default function SignUpUserSteps() {
             </Link>{" "}
             with redirect URLs based on your Vercel deployment URLs.
           </p>
+
           <ul className="mt-4">
             <li>
               -{" "}
@@ -39,12 +42,14 @@ export default function SignUpUserSteps() {
                 http://localhost:3000/**
               </span>
             </li>
+
             <li>
               -{" "}
               <span className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-xs font-medium text-secondary-foreground border">
                 {`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}/**`}
               </span>
             </li>
+
             <li>
               -{" "}
               <span className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-xs font-medium text-secondary-foreground border">
@@ -61,6 +66,7 @@ export default function SignUpUserSteps() {
               )
             </li>
           </ul>
+
           <Link
             href="https://supabase.com/docs/guides/auth/redirect-urls#vercel-preview-urls"
             target="_blank"
@@ -70,6 +76,7 @@ export default function SignUpUserSteps() {
           </Link>
         </TutorialStep>
       ) : null}
+
       <TutorialStep title="Sign up your first user">
         <p>
           Head over to the{" "}
