@@ -87,10 +87,6 @@ export default function FetchDataSteps() {
         <p>Alternatively, you can use a Client Component.</p>
         <CodeBlock code={client} />
       </TutorialStep>
-
-      <TutorialStep title="Build in a weekend and scale to millions!">
-        <p>You're ready to launch your product to the world! 🚀</p>
-      </TutorialStep>
     </ol>
   );
 }

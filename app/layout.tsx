@@ -4,7 +4,6 @@ import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import Link from "next/link";
 import "./globals.css";
-import Footer from "@/components/footer";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -35,23 +34,19 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <main className="min-h-screen flex flex-col items-center">
-            <div className="flex-1 w-full flex flex-col gap-20 items-center">
-              <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-                <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
-                  <Link className="font-semibold" href={"/"}>
-                    Overcode
-                  </Link>
+          <main className="min-h-[100dvh] flex flex-col items-center">
+            <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
+              <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
+                <Link className="font-semibold" href={"/"}>
+                  Overcode
+                </Link>
 
-                  <HeaderAuth />
-                </div>
-              </nav>
-
-              <div className="flex flex-col gap-20 max-w-5xl p-5">
-                {children}
+                <HeaderAuth />
               </div>
+            </nav>
 
-              <Footer />
+            <div className="flex flex-1 w-full h-[calc(100%_-_64px)] bg-slate-200 mx-auto max-w-5xl flex-col gap-20 p-5">
+              {children}
             </div>
           </main>
         </ThemeProvider>
