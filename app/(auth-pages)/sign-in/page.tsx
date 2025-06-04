@@ -1,5 +1,6 @@
 import { signInAction } from "@/app/actions";
 import { FormMessage, Message } from "@/components/form-message";
+import GoogleButton from "@/components/google-sign-in-button";
 import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,8 +8,6 @@ import Link from "next/link";
 
 export default async function Login(props: { searchParams: Promise<Message> }) {
   const searchParams = await props.searchParams;
-
-  console.log({ searchParams });
 
   return (
     <form className="flex-1 flex flex-col min-w-64">
@@ -39,9 +38,12 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
           placeholder="Your password"
           required
         />
+
         <SubmitButton pendingText="Signing In..." formAction={signInAction}>
           Sign in
         </SubmitButton>
+
+        <GoogleButton />
 
         <FormMessage message={searchParams} />
       </div>
