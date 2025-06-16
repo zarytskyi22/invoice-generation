@@ -1,5 +1,4 @@
 import ProfileForm from "@/components/profile/profile-form";
-import UploadAvatar from "@/components/profile/upload-avatar";
 import { createClient } from "@/utils/supabase/server";
 import { ProfileData } from "@/utils/types";
 
@@ -21,7 +20,6 @@ export default async function ProfilePage({}: ProfilePageProps) {
   return (
     <div>
       <h1>Profile Page</h1>
-      <UploadAvatar url={profile.avatar_url} />
       <ProfileForm profile={profile as ProfileData} />
     </div>
   );

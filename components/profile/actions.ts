@@ -2,7 +2,6 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { z } from "zod";
-import { revalidatePath } from "next/cache";
 
 export async function updateProfile(formData: unknown) {
   const profileSchema = z.object({
@@ -17,12 +16,16 @@ export async function updateProfile(formData: unknown) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) throw new Error("Unauthorized");
+  if (!user) return { error: "Not authorized" };
 
-  await supabase
+  const { error: updateError } = await supabase
     .from("profiles")
     .update({ full_name: data.full_name })
     .eq("id", user.id);
+
+  if (updateError) return { error: "Updating profile data error" };
+
+  return { success: true };
 }
 
 export async function uploadAvatar(formData: FormData) {
@@ -35,12 +38,8 @@ export async function uploadAvatar(formData: FormData) {
   const file = formData.get("file");
   const result = uploadAvatarSchema.safeParse({ file });
 
-  if (!result.success) {
+  if (!result.success || !(file instanceof File)) {
     return { error: "Invalid file" };
-  }
-
-  if (!(file instanceof File)) {
-    return { error: "Invalid file type" };
   }
 
   const {
@@ -49,19 +48,40 @@ export async function uploadAvatar(formData: FormData) {
 
   if (!user) return { error: "Not authorized" };
 
-  const fileName = `${user.id}-image`;
-  const filePath = "/" + fileName;
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("avatar_url")
+    .eq("id", user.id)
+    .single();
+
+  if (profileError) return { error: "Failed to fetch profile" };
+
+  const oldAvatarUrl: string | null = profile?.avatar_url ?? null;
+  const isSupabaseUrl = oldAvatarUrl?.includes("avatars/");
+
+  if (oldAvatarUrl && isSupabaseUrl) {
+    const oldFilePath = oldAvatarUrl.split("/avatars/")[1];
+
+    const { error } = await supabase.storage
+      .from("avatars")
+      .remove([oldFilePath]);
+
+    if (error) console.log("Remove old file error", error);
+  }
+
+  const uniqueName = `${user.id}-${Date.now()}`;
+  const filePath = "/" + uniqueName;
 
   const { error: uploadError } = await supabase.storage
     .from("avatars")
     .upload(filePath, file, {
       cacheControl: "3600",
-      upsert: true,
+      upsert: false,
     });
 
   if (uploadError) return { error: "Uploading file error" };
 
-  const { data } = supabase.storage.from("avatars").getPublicUrl(fileName);
+  const { data } = supabase.storage.from("avatars").getPublicUrl(uniqueName);
   const avatarUrl = data.publicUrl;
 
   const { error: updateError } = await supabase
@@ -70,8 +90,6 @@ export async function uploadAvatar(formData: FormData) {
     .eq("id", user.id);
 
   if (updateError) return { error: "Saving avatar URL error" };
-
-  revalidatePath("/protected/profile");
 
   return { success: true };
 }
