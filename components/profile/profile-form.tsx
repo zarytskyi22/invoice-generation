@@ -21,9 +21,12 @@ type ProfileFormProps = {
 
 type ProfileFormValues = z.infer<typeof ProfileSchema>;
 
+const MAX_FILE_SIZE_MB = 50;
+
 export default function ProfileForm({ profile }: ProfileFormProps) {
   const [isPending, startTransition] = useTransition();
   const [file, setFile] = useState<File | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const previewURL = file ? URL.createObjectURL(file) : "";
   const router = useRouter();
@@ -38,7 +41,9 @@ export default function ProfileForm({ profile }: ProfileFormProps) {
   const { isDirty } = form.formState;
 
   const onSubmit = (data: ProfileFormValues) => {
+    setErrorMessage(null);
     const formData = new FormData();
+
     if (file) {
       formData.append("file", file);
     }
@@ -84,11 +89,19 @@ export default function ProfileForm({ profile }: ProfileFormProps) {
         name="file"
         accept="image/*"
         onChange={(e) => {
-          if (e.target.files?.[0]) {
-            setFile(e.target.files[0]);
-          }
+          const file = e.target.files?.[0];
+          file &&
+            (setFile(file),
+            setErrorMessage(
+              file.size > MAX_FILE_SIZE_MB * 1024 * 1024
+                ? "File size too big!"
+                : null
+            ));
         }}
       />
+      {errorMessage && (
+        <p className="mt-1 text-[12px] text-red-500">{errorMessage}</p>
+      )}
 
       <label className="block mt-2">
         <p className="text-sm text-gray-600">Full name</p>
@@ -99,7 +112,7 @@ export default function ProfileForm({ profile }: ProfileFormProps) {
           className="mt-1 w-full md:w-[300px] p-2 border rounded"
         />
         {form.formState.errors.full_name && (
-          <p className="text-sm text-red-500">
+          <p className="mt-1 text-[12px] text-red-500">
             {form.formState.errors.full_name.message}
           </p>
         )}
@@ -108,7 +121,7 @@ export default function ProfileForm({ profile }: ProfileFormProps) {
       <SubmitButton
         className="w-[90px] mt-2"
         type="submit"
-        disabled={isPending || !(isDirty || file)}
+        disabled={isPending || !(isDirty || file) || !!errorMessage}
       >
         {isPending ? "Saving..." : "Save"}
       </SubmitButton>

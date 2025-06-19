@@ -38,14 +38,14 @@ export default function RootLayout({
             <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
               <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
                 <Link className="font-semibold" href={"/"}>
-                  Overcode
+                  Home
                 </Link>
 
                 <HeaderAuth />
               </div>
             </nav>
 
-            <div className="flex flex-1 w-full h-[calc(100%_-_64px)] bg-slate-200 mx-auto max-w-5xl flex-col gap-20 p-5">
+            <div className="flex flex-1 w-full h-[calc(100%_-_64px)] bg-gray-200 mx-auto max-w-5xl flex-col gap-20 p-5">
               {children}
             </div>
           </main>
