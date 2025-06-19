@@ -65,7 +65,8 @@ export default function ProfileForm({ profile }: ProfileFormProps) {
           return;
         }
       }
-
+      form.reset();
+      setFile(null);
       router.refresh();
       // success toast
       console.log("Success updating profile");
