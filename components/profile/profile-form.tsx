@@ -6,10 +6,11 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateProfile, uploadAvatar } from "./actions";
 import { ProfileData } from "@/utils/types";
+import { useRouter } from "next/navigation";
 import { SubmitButton } from "../submit-button";
 import baseAvatar from "../../public/base_avatar.png";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import FormLabel from "../ui/form-label";
 
 const ProfileSchema = z.object({
   full_name: z.string().min(2, "Min 2 characters").max(25, "Max 25 characters"),
@@ -31,14 +32,13 @@ export default function ProfileForm({ profile }: ProfileFormProps) {
   const previewURL = file ? URL.createObjectURL(file) : "";
   const router = useRouter();
 
-  const form = useForm<ProfileFormValues>({
-    resolver: zodResolver(ProfileSchema),
-    defaultValues: {
-      full_name: profile?.full_name || "",
-    },
-  });
-
-  const { isDirty } = form.formState;
+  const { formState, reset, handleSubmit, register } =
+    useForm<ProfileFormValues>({
+      resolver: zodResolver(ProfileSchema),
+      defaultValues: {
+        full_name: profile?.full_name || "",
+      },
+    });
 
   const onSubmit = (data: ProfileFormValues) => {
     setErrorMessage(null);
@@ -57,7 +57,7 @@ export default function ProfileForm({ profile }: ProfileFormProps) {
         }
       }
 
-      if (isDirty) {
+      if (formState.isDirty) {
         const { error: updateError } = await updateProfile(data);
 
         if (updateError) {
@@ -65,7 +65,7 @@ export default function ProfileForm({ profile }: ProfileFormProps) {
           return;
         }
       }
-      form.reset();
+      reset();
       setFile(null);
       router.refresh();
       // success toast
@@ -74,7 +74,7 @@ export default function ProfileForm({ profile }: ProfileFormProps) {
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="mt-4">
       <Image
         height={80}
         width={80}
@@ -105,24 +105,23 @@ export default function ProfileForm({ profile }: ProfileFormProps) {
       )}
 
       <label className="block mt-2">
-        <p className="text-sm text-gray-600">Full name</p>
-
+        <span className="text-sm text-gray-600">Full name</span>
         <input
           type="text"
-          {...form.register("full_name")}
+          {...register("full_name")}
           className="mt-1 w-full md:w-[300px] p-2 border rounded"
         />
-        {form.formState.errors.full_name && (
-          <p className="mt-1 text-[12px] text-red-500">
-            {form.formState.errors.full_name.message}
-          </p>
-        )}
       </label>
+      {formState.errors.full_name && (
+        <p className="mt-1 text-[12px] text-red-500">
+          {formState.errors.full_name.message}
+        </p>
+      )}
 
       <SubmitButton
         className="w-[90px] mt-2"
         type="submit"
-        disabled={isPending || !(isDirty || file) || !!errorMessage}
+        disabled={isPending || !(formState.isDirty || file) || !!errorMessage}
       >
         {isPending ? "Saving..." : "Save"}
       </SubmitButton>

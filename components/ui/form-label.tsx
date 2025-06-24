@@ -1,23 +1,17 @@
 import { cn } from "@/lib/utils";
 import { ComponentPropsWithoutRef } from "react";
-import {
-  FieldValues,
-  Path,
-  UseFormRegister,
-  UseFormReturn,
-} from "react-hook-form";
+import { FieldValues, Path, UseFormReturn } from "react-hook-form";
 
 type FormLabelProps<T extends FieldValues> =
   ComponentPropsWithoutRef<"label"> & {
-    form: UseFormReturn;
-    name: keyof T;
+    formMethods: UseFormReturn<T>;
+    name: Path<T>;
     label: string;
     errorMessage?: string;
-    register: UseFormRegister<FieldValues>;
   };
 
 export default function FormLabel<T extends FieldValues>({
-  form,
+  formMethods,
   name,
   label,
   errorMessage,
@@ -29,7 +23,7 @@ export default function FormLabel<T extends FieldValues>({
 
       <input
         type="text"
-        {...form.register(name as Path<T>)}
+        {...formMethods.register(name)}
         className="mt-1 w-full p-2 border rounded"
       />
       {errorMessage && <p className="text-sm text-red-500">{errorMessage}</p>}

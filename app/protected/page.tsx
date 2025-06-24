@@ -3,6 +3,13 @@ import { InfoIcon } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+const LINKS = [
+  { href: "/protected/profile", label: "Profile page" },
+  { href: "/protected/help", label: "Help page" },
+  { href: "/protected/invoices", label: "Invoices" },
+  { href: "/protected/invoices/new", label: "Generate invoice" },
+];
+
 export default async function ProtectedPage() {
   const supabase = await createClient();
 
@@ -24,24 +31,14 @@ export default async function ProtectedPage() {
       <h2 className="mt-10">Navigation:</h2>
 
       <ul className="mt-5">
-        <li>
-          -{" "}
-          <Link
-            className="text-blue-500 hover:text-gray-500"
-            href="/protected/profile"
-          >
-            Profile page
-          </Link>
-        </li>
-        <li>
-          -{" "}
-          <Link
-            className="hover:text-gray-500 text-blue-500"
-            href="/protected/help"
-          >
-            Help page
-          </Link>
-        </li>
+        {LINKS.map(({ label, href }) => (
+          <li key={label}>
+            -{" "}
+            <Link className="text-blue-500 hover:text-gray-500" href={href}>
+              {label}
+            </Link>
+          </li>
+        ))}
       </ul>
     </div>
   );
