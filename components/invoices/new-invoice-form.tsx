@@ -5,28 +5,31 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ComponentPropsWithoutRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import FormLabel from "../ui/form-label";
+import FormLabel from "../form-label";
 import { SubmitButton } from "../submit-button";
+import ImagePicker from "../image-picker";
+import { DatePicker } from "../ui/date-picker";
+import { DropdownRadio } from "../ui/dropdown-radio";
 
 type NewInvoiceFormProps = ComponentPropsWithoutRef<"form"> & {};
 
 const NewInvoiceFormSchema = z.object({
   invoice_date: z.string(),
-  due_date: z.string().optional(),
+  due_date: z.string().nullable(),
   invoice_number: z.string(),
   pay_terms: z
     .string()
     .refine((val) => !isNaN(Number(val)), {
       message: "Pay Terms must be a number",
     })
-    .optional(),
-  po_number: z.string().optional(),
+    .nullable(),
+  po_number: z.string().nullable(),
   rate_type: z.enum(["Tax", "VAT"]),
   rate: z.string().refine((val) => !isNaN(Number(val)), {
     message: "Rate must be a number",
   }),
   discount_rate: z.string(),
-  currency: z.enum(["USD", "EUR", "USDT", "USDC"]),
+  currency: z.enum(["USD", "EUR", "USDT"]),
   invoice_from: z
     .string()
     .min(2, "Min 2 characters")
@@ -46,18 +49,18 @@ const NewInvoiceFormSchema = z.object({
   price: z.string().refine((val) => !isNaN(Number(val)), {
     message: "Price must be a number",
   }),
-  notes: z.string().max(250, "Max 250 characters").optional(),
-  terms: z.string().max(250, "Max 250 characters").optional(),
+  notes: z.string().max(250, "Max 250 characters").nullable(),
+  terms: z.string().max(250, "Max 250 characters").nullable(),
 });
 
 type NewInvoiceFormValues = z.infer<typeof NewInvoiceFormSchema>;
 
 const defaultValues: NewInvoiceFormValues = {
   invoice_date: "",
-  due_date: undefined,
+  due_date: null,
   invoice_number: "1",
-  pay_terms: undefined,
-  po_number: undefined,
+  pay_terms: null,
+  po_number: null,
   rate_type: "Tax",
   rate: "0",
   discount_rate: "0",
@@ -76,6 +79,14 @@ const defaultValues: NewInvoiceFormValues = {
 
 export default function NewInvoiceForm({ className }: NewInvoiceFormProps) {
   const [logo, setLogo] = useState<File | null>(null);
+  const [invoiceDate, setInvoiceDate] = useState<Date | undefined>(
+    new Date(Date.now())
+  );
+  const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
+  const [rateType, setRateType] = useState<"Tax" | "VAT">("Tax");
+  const [currency, setCurrency] = useState<"USD" | "EUR" | "USDT">("USD");
+
+  // console.log(date ? date.toLocaleDateString("en-US") : "");
 
   const form = useForm<NewInvoiceFormValues>({
     resolver: zodResolver(NewInvoiceFormSchema),
@@ -87,8 +98,22 @@ export default function NewInvoiceForm({ className }: NewInvoiceFormProps) {
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className={cn(className)}>
-      {/* add datepicker */}
+    <form
+      onSubmit={form.handleSubmit(onSubmit)}
+      className={cn("mt-5", className)}
+    >
+      <div className="flex gap-4 flex-wrap justify-between">
+        <ImagePicker file={logo} setFile={setLogo} />
+        <div className="flex flex-col gap-4">
+          <DatePicker
+            label="Invoice Date"
+            date={invoiceDate}
+            setDate={setInvoiceDate}
+          />
+          <DatePicker label="Due Date" date={dueDate} setDate={setDueDate} />
+          <SubmitButton className="ml-auto w-[190px]">Generate</SubmitButton>
+        </div>
+      </div>
       <FormLabel
         formMethods={form}
         name="invoice_number"
@@ -106,21 +131,38 @@ export default function NewInvoiceForm({ className }: NewInvoiceFormProps) {
         name="po_number"
         label="PO Number:"
         errorMessage={form.formState.errors.po_number?.message}
-      />{" "}
-      {/* add rate type dropdown */}
-      <FormLabel
-        formMethods={form}
-        name="rate"
-        label="Rate:"
-        errorMessage={form.formState.errors.rate?.message}
-      />{" "}
-      <FormLabel
-        formMethods={form}
-        name="discount_rate"
-        label="Discount rate:"
-        errorMessage={form.formState.errors.discount_rate?.message}
       />
-      {/* add currency dropdown */}
+      <div className="flex gap-2">
+        <DropdownRadio<"USD" | "EUR" | "USDT">
+          options={["USD", "EUR", "USDT"]}
+          position={currency}
+          setPosition={setCurrency}
+          className="w-[80px] flex"
+        />
+        <DropdownRadio<"Tax" | "VAT">
+          options={["Tax", "VAT"]}
+          position={rateType}
+          setPosition={setRateType}
+          className="w-[80px]"
+        />
+        <FormLabel
+          className="flex flex-row items-center"
+          inputProps={{ type: "number", min: 0 }}
+          formMethods={form}
+          name="rate"
+          label="Rate:"
+          errorMessage={form.formState.errors.rate?.message}
+        />
+        <FormLabel
+          className="flex flex-row items-center"
+          labelClass="text-nowrap"
+          inputProps={{ type: "number", min: 0 }}
+          formMethods={form}
+          name="discount_rate"
+          label="Discount rate:"
+          errorMessage={form.formState.errors.discount_rate?.message}
+        />
+      </div>
       <FormLabel
         formMethods={form}
         name="invoice_from"
@@ -163,7 +205,6 @@ export default function NewInvoiceForm({ className }: NewInvoiceFormProps) {
         label="Terms:"
         errorMessage={form.formState.errors.terms?.message}
       />
-      <SubmitButton className="mt-2">Generate</SubmitButton>
     </form>
   );
 }

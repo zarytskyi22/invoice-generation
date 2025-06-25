@@ -9,8 +9,8 @@ import { ProfileData } from "@/utils/types";
 import { useRouter } from "next/navigation";
 import { SubmitButton } from "../submit-button";
 import baseAvatar from "../../public/base_avatar.png";
-import Image from "next/image";
-import FormLabel from "../ui/form-label";
+import ImagePicker from "../image-picker";
+import FormLabel from "../form-label";
 
 const ProfileSchema = z.object({
   full_name: z.string().min(2, "Min 2 characters").max(25, "Max 25 characters"),
@@ -22,34 +22,30 @@ type ProfileFormProps = {
 
 type ProfileFormValues = z.infer<typeof ProfileSchema>;
 
-const MAX_FILE_SIZE_MB = 50;
-
 export default function ProfileForm({ profile }: ProfileFormProps) {
   const [isPending, startTransition] = useTransition();
-  const [file, setFile] = useState<File | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<File | null>(null);
 
-  const previewURL = file ? URL.createObjectURL(file) : "";
   const router = useRouter();
 
-  const { formState, reset, handleSubmit, register } =
-    useForm<ProfileFormValues>({
-      resolver: zodResolver(ProfileSchema),
-      defaultValues: {
-        full_name: profile?.full_name || "",
-      },
-    });
+  const form = useForm<ProfileFormValues>({
+    resolver: zodResolver(ProfileSchema),
+    defaultValues: {
+      full_name: profile?.full_name || "",
+    },
+  });
+
+  const { formState, reset, handleSubmit } = form;
 
   const onSubmit = (data: ProfileFormValues) => {
-    setErrorMessage(null);
     const formData = new FormData();
 
-    if (file) {
-      formData.append("file", file);
+    if (avatar) {
+      formData.append("file", avatar);
     }
 
     startTransition(async () => {
-      if (file) {
+      if (avatar) {
         const { error: uploadError } = await uploadAvatar(formData);
 
         if (uploadError) {
@@ -62,12 +58,13 @@ export default function ProfileForm({ profile }: ProfileFormProps) {
 
         if (updateError) {
           console.error("Updating profile failed:", updateError);
+          // error toast
           return;
         }
       }
       reset();
-      setFile(null);
       router.refresh();
+      setTimeout(() => setAvatar(null), 3000);
       // success toast
       console.log("Success updating profile");
     });
@@ -75,55 +72,28 @@ export default function ProfileForm({ profile }: ProfileFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="mt-4">
-      <Image
-        height={80}
-        width={80}
-        className="rounded-full object-cover"
-        src={previewURL ? previewURL : profile?.avatar_url || baseAvatar}
-        alt="Avatar"
-        priority
+      <ImagePicker
+        file={avatar}
+        setFile={setAvatar}
+        fallbackImage={profile?.avatar_url || baseAvatar}
       />
 
-      <input
+      <FormLabel
+        formMethods={form}
+        name="full_name"
+        label="Full name:"
+        errorMessage={formState.errors.full_name?.message}
         className="mt-2"
-        type="file"
-        name="file"
-        accept="image/*"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          file &&
-            (setFile(file),
-            setErrorMessage(
-              file.size > MAX_FILE_SIZE_MB * 1024 * 1024
-                ? "File size too big!"
-                : null
-            ));
-        }}
       />
-      {errorMessage && (
-        <p className="mt-1 text-[12px] text-red-500">{errorMessage}</p>
-      )}
-
-      <label className="block mt-2">
-        <span className="text-sm text-gray-600">Full name</span>
-        <input
-          type="text"
-          {...register("full_name")}
-          className="mt-1 w-full md:w-[300px] p-2 border rounded"
-        />
-      </label>
-      {formState.errors.full_name && (
-        <p className="mt-1 text-[12px] text-red-500">
-          {formState.errors.full_name.message}
-        </p>
-      )}
 
       <SubmitButton
         className="w-[90px] mt-2"
         type="submit"
-        disabled={isPending || !(formState.isDirty || file) || !!errorMessage}
+        disabled={
+          isPending || !formState.isValid || !(formState.isDirty || avatar)
+        }
       >
-        {isPending ? "Saving..." : "Save"}
+        {isPending ? "Updating..." : "Update"}
       </SubmitButton>
     </form>
   );
