@@ -37,7 +37,7 @@ export default function ImagePicker({
   return (
     <label
       className={cn(
-        "block w-40 h-40 border-2 transition border-black border-dashed rounded cursor-pointer hover:border-blue-500 overflow-hidden relative",
+        "block aspect-square border-2 transition border-black border-dashed rounded cursor-pointer hover:border-blue-500 overflow-hidden relative",
         (file || fallbackImage) && "border-transparent",
         className
       )}

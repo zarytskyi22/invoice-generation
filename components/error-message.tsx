@@ -12,7 +12,7 @@ export default function ErrorMessage({
   return (
     <p
       className={cn(
-        "h-[12px] leading-[1] px-1 mt-1 text-[12px] text-red-400",
+        "h-[12px] leading-[1] px-1 text-[12px] text-red-400",
         className
       )}
     >

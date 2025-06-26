@@ -1,14 +1,11 @@
 "use server";
 
+import { ProfileSchema, UploadFileSchema } from "@/lib/schemas/profile";
 import { createClient } from "@/utils/supabase/server";
 import { z } from "zod";
 
 export async function updateProfile(formData: unknown) {
-  const profileSchema = z.object({
-    full_name: z.string().min(2).max(100),
-  });
-
-  const data = profileSchema.parse(formData);
+  const data = ProfileSchema.parse(formData); // if !valid throw err
 
   const supabase = await createClient();
 
@@ -29,14 +26,10 @@ export async function updateProfile(formData: unknown) {
 }
 
 export async function uploadAvatar(formData: FormData) {
-  const uploadAvatarSchema = z.object({
-    file: z.instanceof(File),
-  });
-
   const supabase = await createClient();
 
   const file = formData.get("file");
-  const result = uploadAvatarSchema.safeParse({ file });
+  const result = UploadFileSchema.safeParse({ file }); // if !valid doesn't throw err
 
   if (!result.success || !(file instanceof File)) {
     return { error: "Invalid file" };

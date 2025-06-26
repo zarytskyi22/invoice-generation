@@ -27,18 +27,28 @@ export default function FormLabel<T extends FieldValues>({
   inputProps,
 }: FormLabelProps<T>) {
   return (
-    <Label className={cn("", label && "gap-1", className)}>
+    <Label
+      className={cn("relative flex flex-col", label && "gap-1", className)}
+    >
       {label && (
-        <span className={cn("px-1 text-gray-500", labelClass)}>{label}</span>
+        <span className={cn("px-1 text-gray-500 leading-normal", labelClass)}>
+          {label}
+        </span>
       )}
 
       <Input
         type="text"
         {...formMethods.register(name)}
         {...inputProps}
-        className={cn(inputClassName)}
+        className={cn(
+          "placeholder:text-gray-400 placeholder:font-normal",
+          inputClassName
+        )}
       />
-      <ErrorMessage message={errorMessage} />
+      <ErrorMessage
+        className="absolute right-0 -bottom-4"
+        message={errorMessage}
+      />
     </Label>
   );
 }
