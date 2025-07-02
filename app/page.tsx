@@ -5,7 +5,7 @@ export default async function Home() {
   return (
     <>
       <Hero />
-      <main className="flex-1 text-center flex flex-col gap-6 px-4">
+      <div className="flex-1 text-center flex flex-col gap-6 px-4">
         <p>
           Please{" "}
           <Link className="font-medium text-blue-400" href="/sign-in">
@@ -17,7 +17,7 @@ export default async function Home() {
           </Link>{" "}
           to create your first one!
         </p>
-      </main>
+      </div>
     </>
   );
 }

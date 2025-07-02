@@ -6,27 +6,27 @@ export const NewInvoiceFormSchema = z.object({
   invoice_number: z
     .string()
     .nonempty("This field is required")
-    .refine((val) => !isNaN(Number(val)), {
+    .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
       message: "Must be a positive number",
     }),
   pay_terms: z
     .string()
-    .refine((val) => !isNaN(Number(val)), {
+    .refine((val) => val === "" || (!isNaN(Number(val)) && Number(val) > 0), {
       message: "Must be a positive number",
     })
     .nullable(),
   po_number: z.string().nullable(),
   rate_type: z.enum(["Tax", "VAT"]),
-  rate: z
+  tax_rate: z
     .string()
     .optional()
-    .refine((val) => !isNaN(Number(val)), {
+    .refine((val) => val === "" || (!isNaN(Number(val)) && Number(val) > 0), {
       message: "Must be a positive number",
     }),
   discount_rate: z
     .string()
     .optional()
-    .refine((val) => !isNaN(Number(val)), {
+    .refine((val) => val === "" || (!isNaN(Number(val)) && Number(val) > 0), {
       message: "Must be a positive number",
     }),
   currency: z.enum(["USD", "EUR", "USDT"]),
@@ -58,8 +58,8 @@ export const NewInvoiceFormSchema = z.object({
   price: z
     .string()
     .nonempty("This field is required")
-    .refine((val) => !isNaN(Number(val)), {
-      message: "Price must be a number",
+    .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
+      message: "Must be a positive number",
     }),
   notes: z.string().max(250, "Max 250 characters").nullable(),
   terms: z.string().max(250, "Max 250 characters").nullable(),

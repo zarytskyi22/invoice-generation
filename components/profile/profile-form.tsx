@@ -75,11 +75,13 @@ export default function ProfileForm({ profile }: ProfileFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="mt-4">
-      <ImagePicker
-        file={avatar}
-        setFile={setAvatar}
-        fallbackImage={profile?.avatar_url || baseAvatar}
-      />
+      <div className="size-[100px]">
+        <ImagePicker
+          file={avatar}
+          setFile={setAvatar}
+          fallbackImage={profile?.avatar_url || baseAvatar}
+        />
+      </div>
 
       <FormLabel
         formMethods={form}

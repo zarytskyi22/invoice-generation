@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { cn, getCurrencySymbol } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ComponentPropsWithoutRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -13,32 +13,21 @@ import {
   NewInvoiceFormSchema,
   NewInvoiceFormValues,
 } from "@/lib/schemas/invoices";
+import Divider from "../divider";
+import { InvoiceData } from "./new-invoice-page";
+import { defaultValues } from "./constants";
 
-type NewInvoiceFormProps = ComponentPropsWithoutRef<"form"> & {};
-
-const defaultValues: NewInvoiceFormValues = {
-  invoice_date: new Date(),
-  due_date: null,
-  invoice_number: "1",
-  pay_terms: null,
-  po_number: null,
-  rate_type: "Tax",
-  rate: undefined,
-  discount_rate: undefined,
-  currency: "USD",
-  invoice_from: "",
-  invoice_to: "",
-  item_name: "",
-  quantity: "1",
-  price: "1",
-  notes: "",
-  terms: "",
+type NewInvoiceFormProps = ComponentPropsWithoutRef<"form"> & {
+  createNewInvoice: (data: InvoiceData) => void;
 };
 
 // todo
 // change invoice number + 1 on reset
 
-export default function NewInvoiceForm({ className }: NewInvoiceFormProps) {
+export default function NewInvoiceForm({
+  className,
+  createNewInvoice,
+}: NewInvoiceFormProps) {
   const [logo, setLogo] = useState<File | null>(null);
 
   // console.log(date ? date.toLocaleDateString("en-US") : "");
@@ -48,8 +37,34 @@ export default function NewInvoiceForm({ className }: NewInvoiceFormProps) {
     defaultValues,
   });
 
+  const price = Number(form.watch("price"));
+  const quantity = Number(form.watch("quantity"));
+  const subtotal = price * quantity;
+  const rateType = form.watch("rate_type");
+  const discountPercent = Number(form.watch("discount_rate") || 0);
+  const discountValue = (subtotal / 100) * Number(discountPercent);
+  const taxPercent = Number(form.watch("tax_rate") || 0);
+  const taxValue = ((subtotal - discountValue) / 100) * taxPercent;
+  const total = subtotal - discountValue + taxValue;
+  const symbol = getCurrencySymbol(form.watch("currency"));
+
   const onSubmit = (data: NewInvoiceFormValues) => {
-    console.log("form data", data);
+    const result: InvoiceData = {
+      ...data,
+      logo,
+      total_data: {
+        subtotal,
+        discountPercent,
+        discountValue,
+        taxPercent,
+        taxValue,
+        total,
+        symbol,
+      },
+    };
+
+    console.log("form-data", result);
+    createNewInvoice(result);
   };
 
   return (
@@ -60,7 +75,7 @@ export default function NewInvoiceForm({ className }: NewInvoiceFormProps) {
       <div className="w-full flex flex-col gap-4">
         <div className="flex gap-4 flex-wrap justify-between">
           <div className="flex flex-col">
-            <ImagePicker className="" file={logo} setFile={setLogo} />
+            <ImagePicker file={logo} setFile={setLogo} />
 
             <div className="flex flex-col mt-2 gap-2">
               <Controller
@@ -134,14 +149,19 @@ export default function NewInvoiceForm({ className }: NewInvoiceFormProps) {
             name="quantity"
             label="Quantity:"
             errorMessage={form.formState.errors.quantity?.message}
-          />{" "}
+          />
           <FormLabel
             className="w-1/3"
             formMethods={form}
             name="price"
             label="Price:"
             errorMessage={form.formState.errors.price?.message}
-            inputProps={{ placeholder: "(required)" }}
+            inputProps={{
+              type: "number",
+              placeholder: "(required)",
+              min: 0,
+              step: 0.01,
+            }}
           />
         </div>
 
@@ -216,33 +236,73 @@ export default function NewInvoiceForm({ className }: NewInvoiceFormProps) {
         </div>
 
         <FormLabel
-          inputProps={{
-            type: "number",
-            // min: 0,
-            step: "0.01",
-            placeholder: "0.00",
-          }}
-          formMethods={form}
-          name="rate"
-          label="Rate:"
-          errorMessage={form.formState.errors.rate?.message}
-        />
-        <FormLabel
+          name="discount_rate"
+          label="Discount rate (%):"
           labelClass="text-nowrap"
           inputProps={{
             type: "number",
-            // min: 0,
-            step: "0.01",
             placeholder: "0.00",
+            step: 0.01,
+            min: 0,
           }}
           formMethods={form}
-          name="discount_rate"
-          label="Discount rate:"
           errorMessage={form.formState.errors.discount_rate?.message}
         />
+
+        <FormLabel
+          name="tax_rate"
+          label={`${rateType} rate (%):`}
+          inputProps={{
+            type: "number",
+            placeholder: "0.00",
+            step: 0.01,
+            min: 0,
+          }}
+          formMethods={form}
+          errorMessage={form.formState.errors.tax_rate?.message}
+        />
+
         <SubmitButton className="ml-[1px] mt-2 mb-[2px] w-[192px]">
           Generate
         </SubmitButton>
+
+        <div className="font-medium [&>p]:flex [&>p]:justify-between">
+          <p>
+            Subtotal:{" "}
+            <span className="font-normal">
+              {subtotal.toFixed(2)}
+              {symbol}
+            </span>
+          </p>
+
+          <p>
+            Discount:{" "}
+            <span className="font-normal">
+              ({discountPercent || 0}
+              <span className="font-medium">%</span>) {discountValue.toFixed(2)}
+              {symbol}
+            </span>
+          </p>
+
+          <p>
+            {rateType}:{" "}
+            <span className="font-normal">
+              ({taxPercent || 0}
+              <span className="font-medium">%</span>) {taxValue.toFixed(2)}
+              {symbol}
+            </span>
+          </p>
+
+          <Divider className="my-1" />
+
+          <p>
+            Total:{" "}
+            <span className="font-normal">
+              {total.toFixed(2)}
+              {symbol}
+            </span>
+          </p>
+        </div>
       </div>
     </form>
   );

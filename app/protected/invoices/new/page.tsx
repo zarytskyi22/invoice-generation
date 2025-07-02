@@ -1,14 +1,11 @@
-import CreateForm from "@/components/invoices/new-invoice-form";
-import PageTitle from "@/components/page-title";
+import NewInvoicePage from "@/components/invoices/new-invoice-page";
 
 type CreateInvoiceProps = {};
 
 export default async function CreateInvoice({}: CreateInvoiceProps) {
   return (
-    <div>
-      <PageTitle>New invoice</PageTitle>
-
-      <CreateForm />
-    </div>
+    <>
+      <NewInvoicePage />
+    </>
   );
 }
