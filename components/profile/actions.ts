@@ -2,7 +2,6 @@
 
 import { ProfileSchema, UploadFileSchema } from "@/lib/schemas/profile";
 import { createClient } from "@/utils/supabase/server";
-import { z } from "zod";
 
 export async function updateProfile(formData: unknown) {
   const data = ProfileSchema.parse(formData); // if !valid throw err

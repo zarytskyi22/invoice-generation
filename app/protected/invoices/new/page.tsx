@@ -1,4 +1,4 @@
-import NewInvoicePage from "@/components/invoices/new-invoice-page";
+import NewInvoicePage from "@/components/invoices/invoice-page";
 
 type CreateInvoiceProps = {};
 

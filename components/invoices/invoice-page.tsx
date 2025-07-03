@@ -5,6 +5,7 @@ import PageTitle from "@/components/page-title";
 import { InvoiceDialog } from "./invoice-dialog";
 import { useState } from "react";
 import { NewInvoiceFormValues } from "@/lib/schemas/invoices";
+import { Spinner } from "../ui/spinner";
 
 type NewInvoicePageProps = {};
 
@@ -22,24 +23,23 @@ export type InvoiceData = NewInvoiceFormValues & {
 };
 
 export default function NewInvoicePage({}: NewInvoicePageProps) {
-  const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleNewInvoice = (data: InvoiceData) => {
-    setInvoiceData(data);
+  const showSpinner = () => {
+    setIsLoading(true);
   };
 
-  const handleCloseDialog = () => {
-    setInvoiceData(null);
+  const hideSpinner = () => {
+    setIsLoading(false);
   };
 
   return (
     <div>
       <PageTitle>New invoice</PageTitle>
-      <CreateForm createNewInvoice={handleNewInvoice} />
-      <InvoiceDialog
-        invoiceData={invoiceData}
-        closeDialog={handleCloseDialog}
-        isOpen={!!invoiceData}
+      <CreateForm showSpinner={showSpinner} hideSpinner={hideSpinner} />
+      <Spinner
+        className="fixed top-1/2 left-1/2 -translate-1/2"
+        show={isLoading}
       />
     </div>
   );

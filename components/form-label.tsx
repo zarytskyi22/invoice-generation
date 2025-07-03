@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { ComponentPropsWithoutRef, HTMLInputTypeAttribute } from "react";
+import { ComponentPropsWithoutRef } from "react";
 import { FieldValues, Path, UseFormReturn } from "react-hook-form";
 import ErrorMessage from "./error-message";
 import { Input, InputProps } from "./ui/input";

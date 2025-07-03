@@ -19,16 +19,16 @@ export const NewInvoiceFormSchema = z.object({
   rate_type: z.enum(["Tax", "VAT"]),
   tax_rate: z
     .string()
-    .optional()
-    .refine((val) => val === "" || (!isNaN(Number(val)) && Number(val) > 0), {
+    .refine((val) => val === "" || (!isNaN(Number(val)) && Number(val) >= 0), {
       message: "Must be a positive number",
-    }),
+    })
+    .optional(),
   discount_rate: z
     .string()
-    .optional()
-    .refine((val) => val === "" || (!isNaN(Number(val)) && Number(val) > 0), {
+    .refine((val) => val === "" || (!isNaN(Number(val)) && Number(val) >= 0), {
       message: "Must be a positive number",
-    }),
+    })
+    .optional(),
   currency: z.enum(["USD", "EUR", "USDT"]),
   invoice_from: z
     .string()
